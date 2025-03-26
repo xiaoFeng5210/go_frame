@@ -1,0 +1,32 @@
+syntax="proto3";
+
+package idl;    // proto文件互相引用时需要指定package。不需要相互引用时，这一行可以不写
+option go_package="math_service";    //生成go文件后对应的package名
+import "api.proto";
+
+message AddRequest {
+    int32 left = 1[(api.query)="left"];
+    int32 right = 2[(api.query)="right"];
+}
+
+message AddResponse {
+    int32 sum = 1;
+}
+
+message SubRequest {
+    int32 left = 1[(api.form)="left"];
+    int32 right = 2[(api.form)="right"];
+}
+
+message SubResponse {
+    int32 diff = 1;
+}
+
+service Math {
+    rpc Add(AddRequest) returns (AddResponse){
+        option (api.get)="/add";
+    }
+    rpc Sub(SubRequest) returns (SubResponse){
+        option (api.post)="/sub";
+    }
+}

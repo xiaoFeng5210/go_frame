@@ -1,0 +1,41 @@
+syntax="proto3";
+
+package idl;    // proto文件互相引用时需要指定package。不需要相互引用时，这一行可以不写
+option go_package="student_service";    //生成go文件后对应的package名
+import "api.proto";
+
+message Student{
+    // vd校验语法参考：https://github.com/bytedance/go-tagexpr/tree/master/validator。目前不支持跨字段校验
+    string Name = 1[(api.query)="name,required",(api.path)="name,required",(api.form)="name,required",(api.header)="name,required",(api.cookie)="name,required",(api.vd)="len($)>1"];//required表示必传。对于string和集合数据类型可以用len限制于长度
+    int32 Score = 2[(api.body)="score",(api.vd)="$>0 && $<=100"];
+    int64 Enrollment = 3[(api.body)="enrollment",(api.vd)="before_today($)"];
+    int64 Graduation = 4[(api.body)="graduation"];
+    string Address = 5[(api.query)="addr",(api.path)="addr",(api.form)="addr",(api.header)="addr",(api.cookie)="addr"]; 
+}
+
+message Info{
+    string detail_info = 1;   // 在go代码里，这个蛇形就变成了驼峰
+}
+
+service StudentService{
+    rpc Query(Student) returns (Info){
+        option (api.post)="/student";
+    }
+    rpc Restful(Student) returns (Info){
+        option (api.post)="/student/:name/*addr";
+    }
+    rpc PostForm(Student) returns (Info){
+        option (api.post)="/student/form";
+    }
+    rpc PostJson(Student) returns (Info){
+        option (api.post)="/student/json";
+    }
+    rpc PostPb(Student) returns (Info){
+        option (api.post)="/student/pb";
+    }
+    rpc Header(Student) returns (Info){
+        option (api.post)="/student/header";
+    } rpc Cookie(Student) returns (Info){
+        option (api.post)="/student/cookie";
+    }
+}
