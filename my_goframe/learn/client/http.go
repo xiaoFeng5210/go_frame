@@ -26,6 +26,16 @@ func processResponse(resp *http.Response) {
 	}
 	fmt.Print("响应体：")
 	io.Copy(os.Stdout, resp.Body)
+
+	// FIXME:
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		slog.Error("读取响应体失败", "error", err)
+		return
+	}
+	var data map[string]interface{}
+	json.Unmarshal(body, &data)
+
 	os.Stdout.WriteString("\n")
 	if resp.StatusCode != http.StatusOK {
 		slog.Error("异常状态码", "http response code", resp.StatusCode)
